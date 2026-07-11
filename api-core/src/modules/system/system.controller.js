@@ -56,28 +56,3 @@ exports.verifyAudit = catchAsync(async (_req, res, _next) => {
     const result = await audit.verifyChain();
     res.json(result);
 });
-// TEMPORAL: reemplaza por completo movies/tvshows con la data curada local,
-// preservando los _id (para que r2Key/posters sigan apuntando a lo correcto).
-// Se elimina del código apenas termina la migración a Atlas.
-exports.bulkImport = catchAsync(async (req, res, _next) => {
-    const { collection, documents } = req.body;
-    if (!['movies', 'tvshows'].includes(collection)) {
-        return res.status(400).json({ message: 'collection debe ser "movies" o "tvshows"' });
-    }
-    if (!Array.isArray(documents) || documents.length === 0) {
-        return res.status(400).json({ message: 'documents debe ser un array no vacío' });
-    }
-
-    const Model = collection === 'movies'
-        ? require('../catalog/movie.model')
-        : require('../catalog/tvshow.model');
-
-    await Model.deleteMany({});
-    // La base destino puede traer índices heredados de un historial anterior
-    // (ej. tmdbId único) que ya no coinciden con el esquema actual. Los
-    // limpiamos antes de insertar para que no choquen con datos legítimos.
-    try { await Model.collection.dropIndexes(); } catch (e) { /* sin índices extra, no pasa nada */ }
-
-    const result = await Model.insertMany(documents, { ordered: false });
-    res.json({ collection, deleted: true, inserted: result.length });
-});
