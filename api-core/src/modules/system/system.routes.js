@@ -4,8 +4,7 @@ const systemController = require('./system.controller');
 const { requiredAuth, authorize } = require('../../common/auth.middleware');
 
 // TEMPORAL: migración única de la base curada local -> Atlas para el despliegue.
-// Body grande (incluye embeddings), por eso este límite propio y no el global.
-router.post('/bulk-import', express.json({ limit: '20mb' }), requiredAuth, authorize(['admin']), systemController.bulkImport);
+router.post('/bulk-import', requiredAuth, authorize(['admin']), systemController.bulkImport);
 
 // Cualquiera puede ver la config (para que el front aplique el CSS), pero solo admin edita
 router.get('/config', systemController.getConfig);

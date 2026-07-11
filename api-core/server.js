@@ -14,7 +14,7 @@ const { runBootstrap } = require('./src/common/bootstrap');
 connectDB().then(() => runBootstrap());
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
 app.get('/api/system/health', (req, res) => res.status(200).json({ status: 'ok', uptime: process.uptime() }));
 // ─── Módulos de negocio ────────────────────────────────────────────────────
 /** @type {any} */ const authModule            = require('./src/modules/auth');
