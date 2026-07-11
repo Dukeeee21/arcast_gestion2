@@ -1,0 +1,46 @@
+# Ignorar archivos de Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Ignorar configuraciones de IDEs (VSCode, PyCharm, WebStorm)
+.vscode/
+.idea/
+
+# --- Backend (Node.js) ---
+
+# Ignorar dependencias (se instalan con 'npm install')
+/backend/node_modules/
+/api-core/node_modules/
+/api-core/.env
+
+
+/backend/.env
+/ui-web/node_modules/
+/ui-web/.env
+
+/api-core/package-lock.json
+
+# Ignorar logs de npm
+npm-debug.log*
+yarn-error.log
+
+# --- Frontend (Python) ---
+
+# Ignorar el entorno virtual
+/frontend/venv/
+/frontend/.venv/
+.venv/
+venv/
+/ai-engine/venv/
+/ai-engine/.venv/
+
+
+
+# Ignorar caché de Python
+/frontend/__pycache__/
+*.pyc
+
+# --- Videos locales (streaming) ---
+# Ignorar los archivos de video pero conservar la documentación de la carpeta.
+/media/*
+!/media/README.md
