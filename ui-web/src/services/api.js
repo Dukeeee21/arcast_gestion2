@@ -9,6 +9,11 @@ import axios from 'axios';
  */
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
+// Exportado para los pocos lugares que arman URLs "crudas" fuera de axios
+// (ej. src de <video>/<a> para streaming), que de otro modo resolverían la
+// ruta relativa contra el dominio del FRONTEND en vez del backend real.
+export const API_BASE_URL = BASE_URL;
+
 const api = axios.create({
     baseURL: BASE_URL,
     headers: { 'Content-Type': 'application/json' }

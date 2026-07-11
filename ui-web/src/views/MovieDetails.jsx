@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import api from '../services/api';
+import api, { API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import VideoPlayer from '../components/VideoPlayer';
 
@@ -97,7 +97,10 @@ const MovieDetails = () => {
     }, [id, type, item, selectedSeason]);
 
     const streamToken = localStorage.getItem('arcast_token') || '';
-    const localUrl = (type === 'movie' && item?.localPath) ? `/api/stream/movie/${item.tmdbId || id}?token=${streamToken}` : null;
+    // Estas URLs cargan directo en un <video>/<iframe>, fuera de axios — por
+    // eso arman la ruta ABSOLUTA contra el backend real (API_BASE_URL) y no
+    // una ruta relativa, que resolvería contra el dominio del frontend.
+    const localUrl = (type === 'movie' && item?.localPath) ? `${API_BASE_URL}/stream/movie/${item.tmdbId || id}?token=${streamToken}` : null;
     const trailerUrl = item?.trailerKey ? `https://www.youtube.com/embed/${item.trailerKey}` : null;
 
     // Fuente del episodio actual (serie): archivo remoto directo o streaming local con Range.
@@ -105,13 +108,13 @@ const MovieDetails = () => {
         if (type !== 'tvshow' || !currentEpisode?.localPath) return null;
         const lp = currentEpisode.localPath;
         if (/^https?:\/\//i.test(lp)) return lp;
-        return `/api/stream/episode/${id}/${currentEpisode.season}/${currentEpisode.episode}?token=${streamToken}`;
+        return `${API_BASE_URL}/stream/episode/${id}/${currentEpisode.season}/${currentEpisode.episode}?token=${streamToken}`;
     })();
 
     // Fuente activa: local → watchLink → tráiler (películas) | episodio actual (series)
     const source = (() => {
         if (type === 'tvshow') {
-            if (episodeUrl) return { kind: isDirectVideo(episodeUrl) || episodeUrl.startsWith('/api/') ? 'video' : 'iframe', url: episodeUrl };
+            if (episodeUrl) return { kind: isDirectVideo(episodeUrl) || episodeUrl.startsWith(API_BASE_URL) ? 'video' : 'iframe', url: episodeUrl };
             if (trailerUrl) return { kind: 'iframe', url: trailerUrl };
             return null;
         }
@@ -362,7 +365,7 @@ const MovieDetails = () => {
                     ) : (
                         <div className="flex flex-col border border-outline-variant max-w-3xl">
                             {(item.attachments || []).map((att) => (
-                                <a key={att._id} href={`/api/catalog/movies/${id}/attachments/${att._id}/download`} target="_blank" rel="noopener noreferrer"
+                                <a key={att._id} href={`${API_BASE_URL}/catalog/movies/${id}/attachments/${att._id}/download`} target="_blank" rel="noopener noreferrer"
                                     className="px-stack-md py-5 border-b border-outline-variant hover:bg-surface-container transition-all group flex items-center justify-between">
                                     <div className="flex items-center gap-stack-md">
                                         <div className="w-11 h-11 flex items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
