@@ -1,0 +1,42 @@
+services:
+  # Backend (Node/Express) — usa el mismo Dockerfile del desarrollo local.
+  - type: web
+    name: arcast-api-core
+    runtime: docker
+    dockerfilePath: ./api-core/Dockerfile
+    dockerContext: ./api-core
+    plan: free
+    healthCheckPath: /api/system/health
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_BUCKET_NAME
+        value: arcast-media
+      # URL pública del servicio de IA una vez desplegado (ver más abajo).
+      - key: AI_ENGINE_URL
+        sync: false
+
+  # Motor de IA (Python/Flask + Gunicorn) — mismo Dockerfile del dev local.
+  - type: web
+    name: arcast-ai-engine
+    runtime: docker
+    dockerfilePath: ./ai-engine/Dockerfile
+    dockerContext: ./ai-engine
+    plan: free
+    healthCheckPath: /health
