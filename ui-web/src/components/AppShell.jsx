@@ -111,8 +111,10 @@ const AppShell = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const role = user?.role || 'user';
+    // En celular el sidebar es un drawer que entra/sale; en desktop (lg+) va fijo.
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const go = (path) => navigate(path);
+    const go = (path) => { navigate(path); setSidebarOpen(false); };
     const isActive = (path) => {
         if (path === '/') return location.pathname === '/' || location.pathname === '/home';
         return location.pathname.startsWith(path);
@@ -136,13 +138,25 @@ const AppShell = ({ children }) => {
 
     return (
         <div className="bg-background text-on-background min-h-screen">
-            {/* SIDEBAR */}
-            <aside className="fixed left-0 top-0 h-full w-72 bg-surface-container border-r border-outline-variant z-50 flex flex-col">
-                <div className="p-stack-lg border-b border-outline-variant flex items-center gap-stack-sm">
-                    <img src="/logo-icon.png" alt="Arcast" className="w-9 h-9 object-contain" />
-                    <span className="font-headline-sm text-headline-sm tracking-tight uppercase leading-tight">ARCAST<span className="text-primary">.</span></span>
+            {/* Fondo oscuro para cerrar el drawer tocando afuera (solo celular) */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* SIDEBAR — drawer deslizable en celular, fijo en desktop (lg+) */}
+            <aside className={`sidebar-drawer fixed left-0 top-0 h-full w-72 bg-surface-container border-r border-outline-variant z-50 flex flex-col ${sidebarOpen ? 'sidebar-open' : ''}`}>
+                <div className="p-stack-lg border-b border-outline-variant flex items-center justify-between gap-stack-sm">
+                    <div className="flex items-center gap-stack-sm">
+                        <img src="/logo-icon.png" alt="Arcast" className="w-9 h-9 object-contain" />
+                        <span className="font-headline-sm text-headline-sm tracking-tight uppercase leading-tight">ARCAST<span className="text-primary">.</span></span>
+                    </div>
+                    <button onClick={() => setSidebarOpen(false)} className="lg:hidden material-symbols-outlined text-on-surface-variant">close</button>
                 </div>
-                <nav className="flex-1 py-stack-md flex flex-col gap-unit">
+                <nav className="flex-1 py-stack-md flex flex-col gap-unit overflow-y-auto">
                     {mainNav.map((i) => (
                         <NavItem key={i.path} {...i} active={isActive(i.path)} onClick={go} />
                     ))}
@@ -158,35 +172,36 @@ const AppShell = ({ children }) => {
             </aside>
 
             {/* HEADER + CONTENIDO */}
-            <div className="pl-72">
-                <header className="fixed top-0 left-72 right-0 h-20 bg-surface/90 backdrop-blur-md border-b border-outline-variant z-40 flex items-center justify-between px-container-padding">
-                    <div className="flex items-center gap-stack-md flex-shrink-0">
-                        <div className="flex items-center gap-stack-sm border-l-2 border-primary pl-stack-sm">
+            <div className="lg:pl-72">
+                <header className="fixed top-0 left-0 lg:left-72 right-0 h-20 bg-surface/90 backdrop-blur-md border-b border-outline-variant z-30 flex items-center justify-between gap-stack-sm px-stack-md sm:px-container-padding">
+                    <div className="flex items-center gap-stack-md flex-shrink-0 min-w-0">
+                        <button onClick={() => setSidebarOpen(true)} className="lg:hidden material-symbols-outlined text-on-surface shrink-0" aria-label="Abrir menú">menu</button>
+                        <div className="hidden sm:flex items-center gap-stack-sm border-l-2 border-primary pl-stack-sm">
                             <img src="/logo-icon.png" alt="Arcast" className="w-7 h-7 object-contain" />
                             <span className="font-headline-sm text-headline-sm">ARCAST<span className="text-primary">.</span></span>
                         </div>
                     </div>
-                    <div className="flex-1 flex justify-center px-container-padding">
+                    <div className="flex-1 flex justify-center min-w-0">
                         <QuickSearch />
                     </div>
-                    <div className="flex items-center gap-stack-lg flex-shrink-0">
-                        <div className="flex flex-col text-right">
+                    <div className="flex items-center gap-stack-sm sm:gap-stack-lg flex-shrink-0">
+                        <div className="hidden md:flex flex-col text-right">
                             <span className="font-label-md text-label-md text-on-surface uppercase">{ROLE_LABEL[role] || 'Usuario'}</span>
                             <span className="font-mono-data text-mono-data text-on-surface-variant opacity-70">{user?.username || '—'}</span>
                         </div>
-                        <div className="w-10 h-10 bg-primary-container border border-outline flex items-center justify-center text-on-primary-container font-label-md text-label-md">
+                        <div className="w-10 h-10 bg-primary-container border border-outline flex items-center justify-center text-on-primary-container font-label-md text-label-md shrink-0">
                             {avatarInitials}
                         </div>
                         <button
                             onClick={logout}
                             title="Cerrar sesión"
-                            className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors"
+                            className="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors shrink-0"
                         >
                             logout
                         </button>
                     </div>
                 </header>
-                <main className="relative pt-20 min-h-screen bg-background">
+                <main className="relative pt-20 min-h-screen bg-background overflow-x-hidden">
                     {children}
                 </main>
             </div>

@@ -95,6 +95,7 @@ const Home = () => {
     const [trending, setTrending] = useState([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
     const parseList = (k) => (searchParams.get(k) ? searchParams.get(k).split(',').filter(Boolean) : []);
     const region = parseList('region');
@@ -168,10 +169,25 @@ const Home = () => {
 
             <TrendingRow items={trending} onClick={goItem} />
 
+            {/* Botón de filtros — solo visible en celular/tablet (el sidebar de al lado ya cubre desktop) */}
+            <div className="lg:hidden px-container-padding pt-stack-md">
+                <button
+                    onClick={() => setFiltersOpen(v => !v)}
+                    className="w-full flex items-center justify-between gap-stack-sm border border-outline-variant px-stack-md py-stack-sm text-on-surface font-label-md text-label-md uppercase tracking-widest"
+                >
+                    <span className="flex items-center gap-stack-sm">
+                        <span className="material-symbols-outlined text-[18px]">tune</span>
+                        Filtros Avanzados
+                        {activeFilters > 0 && <span className="font-mono-data text-[10px] bg-primary text-on-primary px-2 normal-case">{activeFilters}</span>}
+                    </span>
+                    <span className="material-symbols-outlined text-[18px]">{filtersOpen ? 'expand_less' : 'expand_more'}</span>
+                </button>
+            </div>
+
             {/* CUERPO: filtros + grilla */}
-            <div className="flex flex-1 min-w-0">
-                <aside className="w-72 flex-shrink-0 border-r border-outline-variant bg-surface-container-low p-container-padding hidden lg:block">
-                    <div className="flex items-center justify-between mb-stack-lg border-b border-outline-variant pb-stack-sm">
+            <div className="flex flex-col lg:flex-row flex-1 min-w-0">
+                <aside className={`${filtersOpen ? 'block' : 'hidden'} lg:block w-full lg:w-72 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-outline-variant bg-surface-container-low p-container-padding`}>
+                    <div className="hidden lg:flex items-center justify-between mb-stack-lg border-b border-outline-variant pb-stack-sm">
                         <span className="font-label-md text-label-md text-on-surface uppercase tracking-widest">Filtros Avanzados</span>
                         {activeFilters > 0 && <span className="font-mono-data text-[10px] bg-primary text-on-primary px-2">{activeFilters}</span>}
                     </div>
