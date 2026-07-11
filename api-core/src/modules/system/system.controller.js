@@ -73,6 +73,11 @@ exports.bulkImport = catchAsync(async (req, res, _next) => {
         : require('../catalog/tvshow.model');
 
     await Model.deleteMany({});
+    // La base destino puede traer índices heredados de un historial anterior
+    // (ej. tmdbId único) que ya no coinciden con el esquema actual. Los
+    // limpiamos antes de insertar para que no choquen con datos legítimos.
+    try { await Model.collection.dropIndexes(); } catch (e) { /* sin índices extra, no pasa nada */ }
+
     const result = await Model.insertMany(documents, { ordered: false });
     res.json({ collection, deleted: true, inserted: result.length });
 });
