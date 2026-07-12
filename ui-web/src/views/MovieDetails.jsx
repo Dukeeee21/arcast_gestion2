@@ -480,7 +480,15 @@ const MovieDetails = () => {
                     <div onClick={(e) => e.stopPropagation()} className="bg-surface-container border border-outline max-w-2xl w-full p-stack-lg">
                         <h3 className="font-headline-sm text-headline-sm uppercase mb-unit">Cita {citation.format}</h3>
                         <p className="font-label-md text-label-md text-on-surface-variant mb-stack-md">Generada desde la ficha y guardada en tu workspace.</p>
-                        <div className="bg-surface border border-outline-variant p-stack-md font-mono-data text-mono-data text-on-surface leading-relaxed">{citation.reference}</div>
+                        <div className="bg-surface border border-outline-variant p-stack-md font-mono-data text-mono-data text-on-surface leading-relaxed">
+                            {citation.contentTitle && citation.reference.includes(citation.contentTitle)
+                                ? citation.reference.split(citation.contentTitle).reduce((acc, part, i, arr) => {
+                                    acc.push(part);
+                                    if (i < arr.length - 1) acc.push(<em key={i}>{citation.contentTitle}</em>);
+                                    return acc;
+                                }, [])
+                                : citation.reference}
+                        </div>
                         <div className="flex justify-end gap-stack-sm mt-stack-md">
                             <button onClick={() => navigator.clipboard?.writeText(citation.reference)} className="bg-primary text-on-primary px-stack-lg py-2 font-label-md text-label-md uppercase">Copiar</button>
                             <button onClick={() => setCitation(null)} className="border border-outline-variant text-on-surface-variant px-stack-lg py-2 font-label-md text-label-md uppercase">Cerrar</button>

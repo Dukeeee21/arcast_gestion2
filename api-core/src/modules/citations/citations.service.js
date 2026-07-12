@@ -7,6 +7,44 @@
  */
 const INSTITUTION = 'Archivo Estatal de Medios y Cultura';
 
+// Partículas que van pegadas al apellido en nombres hispanos ("de la Cruz", "del Pino").
+const SURNAME_PARTICLES = new Set(['de', 'del', 'la', 'los', 'las', 'van', 'von', 'da', 'di', 'do']);
+
+/**
+ * Separa un nombre en formato libre ("Javier Fuentes-León") en { given, surname }.
+ * Sin campos estructurados de nombre/apellido en la BD, se asume que la última
+ * palabra (más las partículas que la preceden) es el apellido — la misma
+ * simplificación que usan la mayoría de gestores de citas sin nombre estructurado.
+ */
+function splitName(fullName) {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return { given: '', surname: parts[0] };
+  let splitIdx = parts.length - 1;
+  while (splitIdx > 0 && SURNAME_PARTICLES.has(parts[splitIdx - 1].toLowerCase())) {
+    splitIdx--;
+  }
+  return { given: parts.slice(0, splitIdx).join(' '), surname: parts.slice(splitIdx).join(' ') };
+}
+
+/** "Javier" -> "J.", "J." -> "J." (ya es inicial, se deja tal cual). */
+function toInitials(given) {
+  if (!given) return '';
+  return given.split(/\s+/).map((w) => (/^[A-ZÁÉÍÓÚÑ]\.$/.test(w) ? w : `${w[0].toUpperCase()}.`)).join(' ');
+}
+
+/** "Javier Fuentes-León" -> "Fuentes-León, Javier" (nombre completo, para Chicago). */
+function invertNameFull(fullName) {
+  const { given, surname } = splitName(fullName);
+  return given ? `${surname}, ${given}` : surname;
+}
+
+/** "Javier Fuentes-León" -> "Fuentes-León, J." (con iniciales, para APA). */
+function invertNameInitials(fullName) {
+  const { given, surname } = splitName(fullName);
+  const initials = toInitials(given);
+  return initials ? `${surname}, ${initials}` : surname;
+}
+
 function yearOf(movie) {
   if (movie.anio) return String(movie.anio);
   if (movie.releaseDate) {
@@ -28,7 +66,7 @@ function formatAPA(movie) {
   const year = yearOf(movie);
   const producer = producerOf(movie);
   const author = movie.director
-    ? `${movie.director} (Director)`
+    ? `${invertNameInitials(movie.director)} (Director)`
     : INSTITUTION;
   return `${author}. (${year}). ${title} [Película]. ${producer}.`;
 }
@@ -38,7 +76,7 @@ function formatChicago(movie) {
   const title = movie.title || movie.name || 'Obra sin título';
   const year = yearOf(movie);
   const producer = producerOf(movie);
-  const author = movie.director || INSTITUTION;
+  const author = movie.director ? `${invertNameFull(movie.director)}, dir` : INSTITUTION;
   return `${author}. ${title}. ${producer}, ${year}.`;
 }
 
