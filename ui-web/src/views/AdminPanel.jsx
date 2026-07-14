@@ -200,7 +200,7 @@ const TabCatalog = ({ isSupervisor }) => {
                         {movies.map(m => (
                             <tr key={m._id} className="border-b border-outline-variant hover:bg-surface-container-highest/40 transition-colors">
                                 <td className="px-gutter py-stack-md flex items-center gap-stack-md">
-                                    {m.posterUrl ? <img src={m.posterUrl} className="w-9 h-12 object-cover grayscale" alt="" /> : <div className="w-9 h-12 bg-surface-container-highest flex items-center justify-center"><span className="material-symbols-outlined text-outline-variant text-[18px]">movie</span></div>}
+                                    {m.posterUrl ? <img src={m.posterUrl} className="w-9 h-12 object-cover" alt="" /> : <div className="w-9 h-12 bg-surface-container-highest flex items-center justify-center"><span className="material-symbols-outlined text-outline-variant text-[18px]">movie</span></div>}
                                     <span className="font-body-md text-on-surface font-medium">{m.title}</span>
                                 </td>
                                 <td className="px-gutter py-stack-md"><span className={`px-2 py-1 font-label-md text-[10px] uppercase border ${ESTADO_BADGE[m.estadoPublicacion] || ''}`}>{m.estadoPublicacion || '—'}</span></td>

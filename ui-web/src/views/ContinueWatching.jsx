@@ -57,7 +57,7 @@ const ContinueWatching = () => {
                                 <div key={entry._id} className="group cursor-pointer" onClick={() => navigate(`/item/movie/${entry.contentId}`)}>
                                     <div className="relative aspect-[2/3] w-full border border-outline-variant bg-surface-container-high overflow-hidden mb-stack-sm">
                                         {item.posterUrl ? (
-                                            <img className="object-cover w-full h-full grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500" src={item.posterUrl} alt={item.title || item.name} loading="lazy" />
+                                            <img className="object-cover w-full h-full group-hover:scale-105 transition-all duration-500" src={item.posterUrl} alt={item.title || item.name} loading="lazy" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-outline-variant"><span className="material-symbols-outlined text-5xl">movie</span></div>
                                         )}
