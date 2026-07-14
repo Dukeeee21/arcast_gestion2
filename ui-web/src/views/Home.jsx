@@ -226,7 +226,7 @@ const Home = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-gutter">
-                            {rest.length > 0 && featured && <MovieCard item={featured} featured onClick={() => goItem(featured)} />}
+                            {featured && <MovieCard item={featured} featured onClick={() => goItem(featured)} />}
                             {rest.map((item) => <MovieCard key={item._id} item={item} onClick={() => goItem(item)} />)}
                         </div>
                     )}
