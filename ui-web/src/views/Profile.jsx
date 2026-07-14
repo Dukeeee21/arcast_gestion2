@@ -16,18 +16,23 @@ const Profile = () => {
     const [me, setMe] = useState(null);
     const [annotations, setAnnotations] = useState([]);
     const [citations, setCitations] = useState([]);
+    const [history, setHistory] = useState([]);
 
     useEffect(() => {
         if (!user) return;
         api.get('/users/me').then(r => setMe(r.data)).catch(() => setMe(null));
         api.get('/annotations').then(r => setAnnotations(r.data || [])).catch(() => setAnnotations([]));
         api.get('/citations').then(r => setCitations(r.data || [])).catch(() => setCitations([]));
+        // El progreso de reproducción real vive en Playback (mismo origen que usa
+        // "Mi Historial"), no en el campo user.watchHistory, que nunca se llena.
+        api.get(`/stream/history/${user.id}`)
+            .then(r => setHistory((r.data?.data?.list || []).slice(0, 8)))
+            .catch(() => setHistory([]));
     }, [user]);
 
     if (!user) return <div className="p-container-padding text-on-surface-variant">Acceso denegado.</div>;
 
     const region = me?.region || '—';
-    const history = (me?.watchHistory || []).slice(-8).reverse();
 
     return (
         <div className="flex flex-col w-full">
@@ -86,13 +91,22 @@ const Profile = () => {
                                 <tbody className="font-body-md text-body-md">
                                     {history.length === 0 ? (
                                         <tr><td colSpan={3} className="px-stack-md py-6 text-on-surface-variant opacity-60 border border-outline-variant">Sin reproducciones registradas aún.</td></tr>
-                                    ) : history.map((h, i) => (
-                                        <tr key={i} className="hover:bg-surface-container-high transition-colors">
-                                            <Td mono={false}><Link className="text-primary hover:underline" to={`/item/${(h.contentType || 'Movie').toLowerCase() === 'movie' ? 'movie' : 'tvshow'}/${h.contentId}`}>{h.contentId}</Link></Td>
-                                            <Td>{h.lastTimeWatched ? new Date(h.lastTimeWatched).toLocaleDateString('es-PE') : '—'}</Td>
-                                            <Td>{h.percentWatched ? `${Math.round(h.percentWatched)}%` : '—'}</Td>
-                                        </tr>
-                                    ))}
+                                    ) : history.map((h, i) => {
+                                        const content = h.contentId;
+                                        const title = content?.title || content?.name || 'Contenido no disponible';
+                                        const percent = h.duration ? Math.min(Math.round((h.currentTime / h.duration) * 100), 100) : 0;
+                                        return (
+                                            <tr key={h._id || i} className="hover:bg-surface-container-high transition-colors">
+                                                <Td mono={false}>
+                                                    {content?._id
+                                                        ? <Link className="text-primary hover:underline" to={`/item/movie/${content._id}`}>{title}</Link>
+                                                        : title}
+                                                </Td>
+                                                <Td>{h.lastWatched ? new Date(h.lastWatched).toLocaleDateString('es-PE') : '—'}</Td>
+                                                <Td>{`${percent}%`}</Td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
